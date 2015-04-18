@@ -1,69 +1,64 @@
-local tank, turret, sound
-
-local tank_l, tank_w = 428, 280
-local turret_l, turret_w = 125, 153
-
-local x, y = 200, 200
-
-local tank_angle = 0
-local turret_angle = 0
-
-local scale = 0.4
-local speed = 1
+local tank = {
+	x = 200, 
+	y = 200,
+	angle = 0,
+	scale = 0.4,
+	speed = 1.3,
+	rotationSpeed = 1.4,
+	body = { 
+		x = 214, 
+		y = 140 
+	},
+	turret = { 
+		angle = 0,
+		rotationSpeed = 1.9,
+		x = 125, 
+		y = 76.5
+	}
+}
 
 function love.load()
-	tank = love.graphics.newImage("graphics/tank_body.png")
-	turret = love.graphics.newImage("graphics/tank_turret.png")
-	sound = love.audio.newSource("audio/tank_shot.ogg")
+	tank.body.image = love.graphics.newImage("graphics/tank_body.png")
+	tank.turret.image = love.graphics.newImage("graphics/tank_turret.png")
+	tank.shot = love.audio.newSource("audio/tank_shot.ogg")
+end
+
+function love.draw()
+	love.graphics.draw(tank.body.image, tank.x, tank.y, tank.angle, tank.scale, tank.scale, tank.body.x, tank.body.y)
+	love.graphics.draw(tank.turret.image, tank.x, tank.y, tank.angle + tank.turret.angle, tank.scale, tank.scale, tank.turret.x, tank.turret.y)
 end
 
 function love.update()
 	if love.keyboard.isDown("down") then
-		x = x - speed * math.cos(tank_angle)
-		y = y - speed * math.sin(tank_angle)
+		tank.x = tank.x - tank.speed * math.cos(tank.angle)
+		tank.y = tank.y - tank.speed * math.sin(tank.angle)
 	end
 	
 	if love.keyboard.isDown("up") then
-		x = x + speed * math.cos(tank_angle)
-		y = y + speed * math.sin(tank_angle)
+		tank.x = tank.x + tank.speed * math.cos(tank.angle)
+		tank.y = tank.y + tank.speed * math.sin(tank.angle)
 	end
 	
 	if love.keyboard.isDown("right") then
-		tank_angle = tank_angle + 2 * math.pi / 360
+		tank.angle = tank.angle + tank.rotationSpeed * math.pi / 360
 	end
 
 	if love.keyboard.isDown("left") then
-		tank_angle = tank_angle - 2 * math.pi / 360
+		tank.angle = tank.angle - tank.rotationSpeed * math.pi / 360
 	end
 
 	if love.keyboard.isDown("d") then
-		turret_angle = turret_angle + 2 * math.pi / 360
+		tank.turret.angle = tank.turret.angle + tank.turret.rotationSpeed * math.pi / 360
 	end
 
 	if love.keyboard.isDown("a") then
-		turret_angle = turret_angle - 2 * math.pi / 360
+		tank.turret.angle = tank.turret.angle - tank.turret.rotationSpeed * math.pi / 360
 	end
-end
-
-function love.draw()
-	local x1 = x - (tank_l / 2 * math.cos(tank_angle) - tank_w / 2 * math.sin(tank_angle)) * scale
-	local y1 = y - (tank_w / 2 * math.cos(tank_angle) + tank_l / 2 * math.sin(tank_angle)) * scale
-	love.graphics.draw(tank, x1, y1, tank_angle, scale, scale)
-
-	local x2 = x - (turret_l * math.cos(tank_angle + turret_angle) - turret_w / 2 * math.sin(tank_angle + turret_angle)) * scale
-	local y2 = y - (turret_w / 2 * math.cos(tank_angle + turret_angle) + turret_l * math.sin(tank_angle + turret_angle)) * scale
-	love.graphics.draw(turret, x2, y2, tank_angle + turret_angle, scale, scale)
-
-	love.graphics.setColor(255, 255, 255)
-	love.graphics.circle("line", x1, y1, 10)
-	love.graphics.circle("line", x, y, 10)
-	--love.graphics.draw(turret, x, y, angle, scale, scale)
 end
 
 function love.keypressed(key)
 	if key == " " then
-		love.audio.play(sound)
-
+		love.audio.play(tank.shot)
 	elseif key == "escape" then
 		love.event.push('quit') 	
 	end
